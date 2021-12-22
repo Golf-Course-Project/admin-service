@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Operations Version="1.0" xmlns="http://schemas.microsoft.com/sqlserver/dac/Serialization/2012/02">
+  <Operation Name="Rename Refactor" Key="b344767b-242e-42f2-9b5e-366548d6c398" ChangeDateTime="12/22/2021 03:01:21">
+    <Property Name="ElementName" Value="[dbo].[Groups].[GroupId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Groups]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="Type" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="fa904578-81c7-4c23-99dc-5290c8e85f3a" ChangeDateTime="12/22/2021 03:22:50">
+    <Property Name="ElementName" Value="[dbo].[Settings].[IsEncryped]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Settings]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="IsEncrypted" />
+  </Operation>
+</Operations>
