@@ -3,82 +3,109 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Security.Claims;
 
 using AdminService.Repos.Identity;
-using AdminService.Entities.Identity;
+using AdminService.Enums;
+using AdminService.ViewModels.Internal;
 
 namespace AdminService.Misc
 {
     public class TokenAuthorizationActionFilter : IActionFilter
     {
-        private IAuthRepo _authRepo;
+        private IIdentityRepo _identityRepo;
 
-        public TokenAuthorizationActionFilter(IAuthRepo authRepo)
+        public TokenAuthorizationActionFilter(IIdentityRepo identityRepo)
         {
-            _authRepo = authRepo;
+            _identityRepo = identityRepo;
         }
 
         public void OnActionExecuting(ActionExecutingContext context)
         {
-            ApiResponse response = new ApiResponse() { Success = false };
-
-            if (MethodIsAllowAnonymousAuthorization(context))
+            ApiResponse response = new ApiResponse()
             {
-                return;
+                Success = false,
+                MessageCode = ApiMessageCodes.AuthFailed
             };
 
-            List<Claim> claims = context.HttpContext.User.Identities.First().Claims.ToList();
-            string token = claims?.FirstOrDefault(x => x.Type.Equals("token", StringComparison.OrdinalIgnoreCase))?.Value;
+            // if the method allows anonoymous access then return success and skip token validation logic
+            if (MethodIsAllowAnonymousAuthorization(context)) return;
 
-            if (String.IsNullOrEmpty(token))
+            // get x-authorization header value
+            string header_value = context.HttpContext.Request.Headers?.FirstOrDefault(x => x.Key.Equals("X-Authorization", StringComparison.OrdinalIgnoreCase)).Value;
+
+            // if the header valu is empty, somethign went wrong, return a 401
+            if (string.IsNullOrEmpty(header_value))
             {
-                response.Message = "Missing token";
+                response.Message = "Missing bearer token from X-Authorization header";
                 context.Result = new StandardResponseObjectResult(response, StatusCodes.Status401Unauthorized);
+
                 return;
             }
 
-            // get token record by token
-            Token userTokenEntity = _authRepo.GetToken(token);            
-                        
-            if (userTokenEntity == null)
+            // if we have a bearer, then treat it as a jwt token
+            // this is the most common entry point for web users
+            if (header_value.ToLower().Contains("bearer"))
             {
-                response.Message = "Invalid token";
-                context.Result = new StandardResponseObjectResult(response, StatusCodes.Status401Unauthorized);
+                string[] splitToken = header_value.Split(' ');
+                string jwt = splitToken[1];
+
+                //make sure jwt is not empty
+                if (String.IsNullOrEmpty(jwt))
+                {
+                    response.Message = "Missing bearer token from X-Authorization header";
+                    context.Result = new StandardResponseObjectResult(response, StatusCodes.Status401Unauthorized);
+
+                    return;
+                }
+
+                // validate jwt against the identity service
+                ValidateTokenResponse validateResponse = _identityRepo.ValidateJwt(jwt);
+
+                // if it is not successully validated, return 401
+                if (validateResponse == null || !validateResponse.Success)
+                {
+                    response.Message = "Error validating jwt: " + response.Message + "'";
+                    context.Result = new StandardResponseObjectResult(response, StatusCodes.Status401Unauthorized);
+
+                    return;
+                }
+
                 return;
             }
 
-            if (userTokenEntity.IsRevoked)
+            // if not a bearer then assume we have a personal access token from a device
+            else
             {
-                response.Message = "Token has been revoked";
-                context.Result = new StandardResponseObjectResult(response, StatusCodes.Status401Unauthorized);
-                return;
+                string token = header_value;
+
+                if (String.IsNullOrEmpty(token))
+                {
+                    response.Message = "Missing token from X-Authorization header";
+                    context.Result = new StandardResponseObjectResult(response, StatusCodes.Status401Unauthorized);
+                    return;
+                }
             }
-            
-            return;
+
+            //var handler = new JwtSecurityTokenHandler().ReadJwtToken(jwt);
+            //var userProfileId = handler.Claims.First(x => x.Type == "unique_name").Value;
         }
 
         public void OnActionExecuted(ActionExecutedContext context)
         {
             // Do something after the action executes.
         }
-        
-        /// <summary>
-        /// check to see of the AllowAnonymous attribute has been set to the method
-        /// </summary>
-        /// <param name="context"></param>
-        /// <returns>boolean</returns>
+
         private static bool MethodIsAllowAnonymousAuthorization(ActionExecutingContext context)
-        {  
+        {
             if (context == null) { return false; }
 
             ControllerActionDescriptor actionDescriptor = context.ActionDescriptor as ControllerActionDescriptor;
             bool results = actionDescriptor.MethodInfo.GetCustomAttributes(typeof(AllowAnonymousAttribute)).Any();
-                
+
             return results;
         }
+
     }
 }

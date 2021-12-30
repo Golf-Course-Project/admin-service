@@ -1,15 +1,17 @@
-﻿using AdminService.Misc;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
+
+using AdminService.Misc;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace AdminService.Helpers
 {  
     public class StandardHelper : IStandardHelper
     {
         private IOptions<AppSettings> _appSettings;
+        private IHttpContextAccessor _httpContextAccessor;
         private readonly int _daysToExpire = 7;
 
         public int DaysToExpire
@@ -17,9 +19,10 @@ namespace AdminService.Helpers
             get { return _daysToExpire; }
         }
 
-        public StandardHelper(IOptions<AppSettings> appSettings)
+        public StandardHelper(IOptions<AppSettings> appSettings, IHttpContextAccessor httpContextAccessor)
         {
             _appSettings = appSettings;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public string GetNewId
@@ -35,11 +38,11 @@ namespace AdminService.Helpers
             get { return DateTime.Now; }
         }
 
-        public IOptions<AppSettings> AppSettings 
+        public AppSettings AppSettings 
         { 
             get 
             { 
-                return _appSettings; 
+                return _appSettings.Value; 
             } 
         }
 
@@ -67,7 +70,7 @@ namespace AdminService.Helpers
         int DaysToExpire { get; }
         string GetNewId { get; }
         DateTime GetDateTime { get; }
-        IOptions<AppSettings> AppSettings { get;  }
+        AppSettings AppSettings { get;  }
         string GetTokenFromIdentity(System.Security.Claims.ClaimsPrincipal user);
         string Base64Decode(string base64EncodedData);
         string Base64Encode(string clearText);
