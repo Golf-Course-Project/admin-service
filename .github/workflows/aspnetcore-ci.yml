@@ -1,0 +1,28 @@
+name: CI
+
+on: 
+  pull_request:
+  push: 
+    branches:
+    - master
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+    
+    - name: Restore with dotnet
+      run: dotnet restore 
+    
+    - name: Build with dotnet
+      run: dotnet build --configuration Release
+      
+    - name: Test with dotnet
+      run: dotnet test --configuration Release
