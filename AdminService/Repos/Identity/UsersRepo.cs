@@ -51,7 +51,7 @@ namespace AdminService.Repos.Identity
             {
                 results = _dbContextForSp.UserList.FromSqlRaw<UserList>("EXEC [dbo].[spListUsers]").ToList<UserList>();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 results = null;
             }

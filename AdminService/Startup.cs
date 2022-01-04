@@ -55,6 +55,7 @@ namespace IdentityService
             services.AddSingleton<IStandardHelper, StandardHelper>();
             services.AddTransient<IAuthRepo, AuthRepo>();
             services.AddTransient<IUsersRepo, UsersRepo>();
+            services.AddTransient<ICodesRepo, CodesRepo>();
             services.AddTransient<ITokensRepo, TokensRepo>();
             services.AddTransient<IIdentityRepo, IdentityRepo>();
 

@@ -8,11 +8,12 @@ using AdminService.Repos.Identity;
 using AdminService.ViewModels.Identity;
 using System.Collections.Generic;
 using System.Linq;
+using AdminService.Enums;
 
 namespace AdminService.Controllers
 {
     [Route("api/users")]
-    [Authorize]
+    [ApiController]
     [ServiceFilter(typeof(TokenAuthorizationActionFilter))]
     public partial class UsersController : Controller
     {      
@@ -23,7 +24,8 @@ namespace AdminService.Controllers
             _usersRepo = usersRepo;                     
         }
 
-        [HttpPost]     
+        [HttpPost]
+        [Route("list")]
         public IActionResult List()
         {
             ApiResponse response = new ApiResponse();
@@ -35,7 +37,7 @@ namespace AdminService.Controllers
                 if (list != null)
                 {
                     response.Success = true; 
-                    response.MessageCode = Enums.ApiMessageCodes.Success;
+                    response.MessageCode = ApiMessageCodes.Success;
                     response.Message = "Success";
                     response.Count = list.Count();
                     response.Value = list;                    

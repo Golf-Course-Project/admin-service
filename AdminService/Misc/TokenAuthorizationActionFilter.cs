@@ -64,7 +64,7 @@ namespace AdminService.Misc
                 ValidateTokenResponse validateResponse = _identityRepo.ValidateJwt(jwt);
 
                 // if it is not successully validated, return 401
-                if (validateResponse == null || !validateResponse.Success)
+                if (validateResponse == null || validateResponse.Success != true)
                 {
                     response.Message = "Error validating jwt: " + response.Message + "'";
                     context.Result = new StandardResponseObjectResult(response, StatusCodes.Status401Unauthorized);

@@ -33,7 +33,7 @@ namespace AdminService.Repos.Identity
             IEnumerable<CodesListWithUser> results;
             try
             {
-                results = _dbContextForSp.CodesListWithUser.FromSqlRaw<CodesListWithUser>("EXEC [dbo].[spCodesListWithUser]").ToList<CodesListWithUser>();
+                results = _dbContextForSp.CodesListWithUser.FromSqlRaw<CodesListWithUser>("EXEC [dbo].[spListCodesWithUsers]").ToList<CodesListWithUser>();
             }
             catch (Exception)
             {

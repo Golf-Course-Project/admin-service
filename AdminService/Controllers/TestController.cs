@@ -1,17 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using System;
 
 using AdminService.Helpers;
 using AdminService.Misc;
-
-using AdminService.Repos;
-using AdminService.Entities;
 using AdminService.Enums;
 
-namespace IdentityService.Controllers
+namespace AdminService.Controllers
 {
     [Route("api/test")]
     [ApiController]
