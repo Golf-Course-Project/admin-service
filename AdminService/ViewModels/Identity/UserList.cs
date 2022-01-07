@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 namespace AdminService.ViewModels.Identity
 {
     public class UserList
-    {
+    {              
         [Key]
         [JsonProperty(PropertyName = "id")]
         public string Id { get; set; }
@@ -35,7 +35,11 @@ namespace AdminService.ViewModels.Identity
         [JsonProperty(PropertyName = "dateUpdated")]
         public DateTime? DateUpdated { get; set; }
 
-        [JsonProperty(PropertyName = "dateUpdated")]
+        [JsonProperty(PropertyName = "dateLastAttempt")]
         public DateTime? DateLastAttempt { get; set; }
+
+        [JsonProperty(PropertyName = "rowNumber")]
+        public Int64 RowNumber { get; set; }
+
     }
 }
