@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using AdminService.Data;
 using AdminService.Entities.Identity;
 using AdminService.ViewModels.Identity;
-
+using Microsoft.Data.SqlClient;
 
 namespace AdminService.Repos.Identity
 {
@@ -44,14 +44,19 @@ namespace AdminService.Repos.Identity
             return item;
         }
 
-        public IEnumerable<UserList> List()
+        public IEnumerable<UserList> List(ListUsersPost search)
         {
             IEnumerable<UserList> results;
             try
             {
-                results = _dbContextForSp.UserList.FromSqlRaw<UserList>("EXEC [dbo].[spListUsers]").ToList<UserList>();
+                results = _dbContextForSp.UserList.FromSqlRaw<UserList>("EXEC [dbo].[spListUsers] @Name, @Email, @IsActive, @Status, @Role",
+                    new SqlParameter("@Name", string.IsNullOrEmpty(search.Name) ? DBNull.Value : search.Name),
+                    new SqlParameter("@Email", string.IsNullOrEmpty(search.Email) ? DBNull.Value : search.Email),
+                    new SqlParameter("@IsActive", search.IsActive),
+                    new SqlParameter("@Status", search.Status),
+                    new SqlParameter("@Role", string.IsNullOrEmpty(search.Role) ? DBNull.Value : search.Role)).ToList<UserList>();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 results = null;
             }
@@ -186,7 +191,7 @@ namespace AdminService.Repos.Identity
     public interface IUsersRepo
     {
         User Fetch(string id);
-        IEnumerable<UserList> List();
+        IEnumerable<UserList> List(ListUsersPost search);
         void Create(User item);     
         void Update(User item, string fields);
         void Delete(string id, DateTime dateDeleted);

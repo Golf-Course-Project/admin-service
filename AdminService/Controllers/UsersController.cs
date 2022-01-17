@@ -26,13 +26,29 @@ namespace AdminService.Controllers
 
         [HttpPost]
         [Route("list")]
-        public IActionResult List()
+        public IActionResult List([FromBody] ListUsersPost body)
         {
+            if (body == null)
+            {
+                body = new ListUsersPost();
+            }
+
+            ListUsersPost newBody = new ListUsersPost()
+            {
+                Name = String.IsNullOrEmpty(body.Name) ? null : body.Name.Trim(),
+                Email = String.IsNullOrEmpty(body.Email) ? null : body.Email.Trim(),
+                Role = String.IsNullOrEmpty(body.Role) ? null : body.Role.Trim(),
+                Status = body.Status == null ? -1 : body.Status,
+                IsActive = body.IsActive
+            };
+
+            body = null;
+
             ApiResponse response = new ApiResponse();
 
             try 
             {
-                IEnumerable<UserList> list = _usersRepo.List();
+                IEnumerable<UserList> list = _usersRepo.List(newBody);
 
                 if (list != null)
                 {
@@ -52,7 +68,7 @@ namespace AdminService.Controllers
             {
                 response.MessageCode = Enums.ApiMessageCodes.ExceptionThrown;
                 response.Message = "Error getting list:" + ex.Message;
-            }
+            }           
 
             return new StandardResponseObjectResult(response, StatusCodes.Status200OK);
         }

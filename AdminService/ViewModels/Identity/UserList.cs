@@ -23,6 +23,9 @@ namespace AdminService.ViewModels.Identity
         [JsonProperty(PropertyName = "status")]
         public UserStatus Status { get; set;  }
 
+        [JsonProperty(PropertyName = "statusText")]
+        public string StatusText { get; set; }
+
         [JsonProperty(PropertyName = "loginAttempts")]
         public int LoginAttempts { get; set; }
 

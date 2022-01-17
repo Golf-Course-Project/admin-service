@@ -21,10 +21,8 @@ namespace AdminService.Tests.Controllers
     [TestClass]
     public class UsersControllerTest
     {
-        private Mock<IUsersRepo> _mockUsersRepo;        
-        private Mock<IStandardHelper> _mockHelper;
-        private Mock<IPrincipal> _mockPrinciple;
-        private Mock<IOptions<AppSettings>> _mockAppSettings;
+        private Mock<IUsersRepo> _mockUsersRepo;      
+        private Mock<IPrincipal> _mockPrinciple;      
 
         private UsersController _controller;
         private ControllerContext _controllerContext;
@@ -71,10 +69,12 @@ namespace AdminService.Tests.Controllers
                 new UserList() { Id = "f750ba46-4f87-45d0-9509-3cdd5bfffaa6" }
             };
 
-            _mockUsersRepo.Setup(x => x.List()).Returns(list);
+            ListUsersPost body = new ListUsersPost();
+
+            _mockUsersRepo.Setup(x => x.List(It.IsAny<ListUsersPost>())).Returns(list);
 
             // act
-            IActionResult result = _controller.List();
+            IActionResult result = _controller.List(body);
             var standardResponse = (StandardResponseObjectResult)result;
             var apiResponse = (ApiResponse)standardResponse.Value;
 
@@ -86,7 +86,7 @@ namespace AdminService.Tests.Controllers
             Assert.AreEqual("Success", apiResponse.Message);
             Assert.IsTrue(apiResponse.Count == 3);
 
-            _mockUsersRepo.Verify(x => x.List(), Times.Once);
+            _mockUsersRepo.Verify(x => x.List(It.IsAny<ListUsersPost>()), Times.Once);
         }
 
         [TestMethod]
@@ -96,11 +96,12 @@ namespace AdminService.Tests.Controllers
         {
             // arrange            
             IEnumerable<UserList> list = null;
+            ListUsersPost body = new ListUsersPost();
 
-            _mockUsersRepo.Setup(x => x.List()).Returns(list);
+            _mockUsersRepo.Setup(x => x.List(It.IsAny<ListUsersPost>())).Returns(list);
 
             // act
-            IActionResult result = _controller.List();
+            IActionResult result = _controller.List(body);
             var standardResponse = (StandardResponseObjectResult)result;
             var apiResponse = (ApiResponse)standardResponse.Value;
 
@@ -111,7 +112,7 @@ namespace AdminService.Tests.Controllers
             Assert.AreEqual(ApiMessageCodes.NoResults, apiResponse.MessageCode);
             Assert.AreEqual("No results found", apiResponse.Message);            
 
-            _mockUsersRepo.Verify(x => x.List(), Times.Once);
+            _mockUsersRepo.Verify(x => x.List(It.IsAny<ListUsersPost>()), Times.Once);
         }
     }
 }

@@ -22,8 +22,7 @@ namespace AdminService.Tests.Controllers
     {         
         private Mock<IStandardHelper> _mockHelper;    
 
-        private TestController _controller;
-        private ControllerContext _controllerContext;   
+        private TestController _controller;  
 
         [TestInitialize]
         public void TestInitialize()        {
