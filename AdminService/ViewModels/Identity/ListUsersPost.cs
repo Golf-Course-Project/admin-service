@@ -12,8 +12,7 @@ namespace AdminService.ViewModels.Identity
             Name = null;
             Email = null;
             Role = null;
-            Status = -1;
-            IsActive = true;
+            Status = -1;        
         }
 
         [JsonProperty(PropertyName = "name")]
@@ -26,9 +25,6 @@ namespace AdminService.ViewModels.Identity
         public string Role { get; set; }
 
         [JsonProperty(PropertyName = "status")]
-        public int? Status { get; set; }
-
-        [JsonProperty(PropertyName = "isActive")]
-        public bool IsActive { get; set; }        
+        public int? Status { get; set; }           
     }
 }

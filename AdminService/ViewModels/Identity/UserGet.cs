@@ -21,10 +21,7 @@ namespace AdminService.ViewModels.Identity
         public string Role { get; set;  }
 
         [JsonProperty(PropertyName = "status")]
-        public UserStatus Status { get; set;  }
-
-        [JsonProperty(PropertyName = "isActive")]
-        public bool IsActive { get; set; }     
+        public UserStatus Status { get; set;  }      
 
         [JsonProperty(PropertyName = "dateCreated")]
         public DateTime DateCreated { get; set; }

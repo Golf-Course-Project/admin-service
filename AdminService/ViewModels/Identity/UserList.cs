@@ -27,10 +27,7 @@ namespace AdminService.ViewModels.Identity
         public string StatusText { get; set; }
 
         [JsonProperty(PropertyName = "loginAttempts")]
-        public int LoginAttempts { get; set; }
-
-        [JsonProperty(PropertyName = "isActive")]
-        public bool IsActive { get; set; }     
+        public int LoginAttempts { get; set; }    
 
         [JsonProperty(PropertyName = "dateCreated")]
         public DateTime DateCreated { get; set; }

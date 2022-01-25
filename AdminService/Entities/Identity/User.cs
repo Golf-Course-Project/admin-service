@@ -15,8 +15,7 @@ namespace AdminService.Entities.Identity
         public string Role { get; set; } = "basic";
         public string IPAddress {get; set;}
         public Enums.UserStatus Status { get; set; } = Enums.UserStatus.NotConfirmed;
-        public int LoginAttempts { get; set; }
-        public bool IsActive { get; set; } = false;      
+        public int LoginAttempts { get; set; }       
         public bool IsDeleted { get; set; } = false;     
         public DateTime? DateLastAttempt { get; set; }
         public DateTime? DateReset { get; set; }

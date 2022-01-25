@@ -38,8 +38,7 @@ namespace AdminService.Controllers
                 Name = String.IsNullOrEmpty(body.Name) ? null : body.Name.Trim(),
                 Email = String.IsNullOrEmpty(body.Email) ? null : body.Email.Trim(),
                 Role = String.IsNullOrEmpty(body.Role) ? null : body.Role.Trim(),
-                Status = body.Status == null ? -1 : body.Status,
-                IsActive = body.IsActive
+                Status = body.Status == null ? -1 : body.Status               
             };
 
             body = null;

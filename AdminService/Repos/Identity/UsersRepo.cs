@@ -49,10 +49,9 @@ namespace AdminService.Repos.Identity
             IEnumerable<UserList> results;
             try
             {
-                results = _dbContextForSp.UserList.FromSqlRaw<UserList>("EXEC [dbo].[spListUsers] @Name, @Email, @IsActive, @Status, @Role",
+                results = _dbContextForSp.UserList.FromSqlRaw<UserList>("EXEC [dbo].[spListUsers] @Name, @Email, @Status, @Role",
                     new SqlParameter("@Name", string.IsNullOrEmpty(search.Name) ? DBNull.Value : search.Name),
-                    new SqlParameter("@Email", string.IsNullOrEmpty(search.Email) ? DBNull.Value : search.Email),
-                    new SqlParameter("@IsActive", search.IsActive),
+                    new SqlParameter("@Email", string.IsNullOrEmpty(search.Email) ? DBNull.Value : search.Email),                 
                     new SqlParameter("@Status", search.Status),
                     new SqlParameter("@Role", string.IsNullOrEmpty(search.Role) ? DBNull.Value : search.Role)).ToList<UserList>();
             }
