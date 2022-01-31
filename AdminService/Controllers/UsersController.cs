@@ -9,6 +9,8 @@ using AdminService.ViewModels.Identity;
 using System.Collections.Generic;
 using System.Linq;
 using AdminService.Enums;
+using AdminService.Entities.Identity;
+using AdminService.Helpers;
 
 namespace AdminService.Controllers
 {
@@ -17,11 +19,13 @@ namespace AdminService.Controllers
     [ServiceFilter(typeof(TokenAuthorizationActionFilter))]
     public partial class UsersController : Controller
     {      
-        private IUsersRepo _usersRepo;         
+        private IUsersRepo _usersRepo;
+        private IStandardHelper _helper;
 
-        public UsersController(IUsersRepo usersRepo)
+        public UsersController(IUsersRepo usersRepo, IStandardHelper helper)
         {           
-            _usersRepo = usersRepo;                     
+            _usersRepo = usersRepo;
+            _helper = helper;
         }
 
         [HttpPost]
@@ -72,5 +76,153 @@ namespace AdminService.Controllers
             return new StandardResponseObjectResult(response, StatusCodes.Status200OK);
         }
 
+        [HttpPatch]
+        [Route("delete/{id}")]
+        public IActionResult Delete (string id)
+        {
+            ApiResponse response = new ApiResponse();
+
+            if (string.IsNullOrEmpty(id))
+            {
+                response.MessageCode = Enums.ApiMessageCodes.EmptyValue;
+                response.Message = "Id cannot be empty";
+                return new StandardResponseObjectResult(response, StatusCodes.Status200OK);
+            }         
+            
+            try
+            {
+                _usersRepo.Delete(id, _helper.GetDateTime);
+                int result = _usersRepo.SaveChanges();
+
+                if (result == 0)
+                {
+                    response.Message = "Error updating user";
+                    response.MessageCode = ApiMessageCodes.Failed;
+
+                    return new StandardResponseObjectResult(response, StatusCodes.Status500InternalServerError);
+                }
+
+                response.Success = true;
+                response.MessageCode = ApiMessageCodes.Success;
+                response.Message = "Success";
+
+                return new StandardResponseObjectResult(response, StatusCodes.Status202Accepted);
+            } 
+            catch (Exception ex)
+            {
+                response.Message = "Exception thrown: " + ex.Message;
+                response.MessageCode = ApiMessageCodes.ExceptionThrown;
+
+                return new StandardResponseObjectResult(response, StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        [HttpPatch]
+        [Route("activate/{id}")]
+        public IActionResult Activate(string id)
+        {
+            ApiResponse response = new ApiResponse();
+
+            if (string.IsNullOrEmpty(id))
+            {
+                response.MessageCode = Enums.ApiMessageCodes.EmptyValue;
+                response.Message = "Id cannot be empty";
+                return new StandardResponseObjectResult(response, StatusCodes.Status200OK);
+            }
+
+            User user = _usersRepo.Fetch(id);
+
+            if (user == null)
+            {
+                response.Message = "Id not found";
+                response.MessageCode = ApiMessageCodes.NotFound;
+
+                return new StandardResponseObjectResult(response, StatusCodes.Status200OK);
+            }
+
+            try
+            {
+                user.Status = UserStatus.Okay;
+                user.DateReset = _helper.GetDateTime;
+
+                _usersRepo.Update(user, "Status,DateReset");
+                int result = _usersRepo.SaveChanges();
+
+                if (result == 0)
+                {
+                    response.Message = "Error updating user";
+                    response.MessageCode = ApiMessageCodes.Failed;
+
+                    return new StandardResponseObjectResult(response, StatusCodes.Status500InternalServerError);
+                }
+
+                response.Success = true;
+                response.MessageCode = ApiMessageCodes.Success;
+                response.Message = "Success";
+
+                return new StandardResponseObjectResult(response, StatusCodes.Status202Accepted);
+            }
+            catch (Exception ex)
+            {
+                response.Message = "Exception thrown: " + ex.Message;
+                response.MessageCode = ApiMessageCodes.ExceptionThrown;
+
+                return new StandardResponseObjectResult(response, StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        [HttpPatch]
+        [Route("deactivate/{id}")]
+        public IActionResult Block(string id)
+        {
+            ApiResponse response = new ApiResponse();
+
+            if (string.IsNullOrEmpty(id))
+            {
+                response.MessageCode = Enums.ApiMessageCodes.EmptyValue;
+                response.Message = "Id cannot be empty";
+                return new StandardResponseObjectResult(response, StatusCodes.Status200OK);
+            }
+
+            User user = _usersRepo.Fetch(id);
+
+            if (user == null)
+            {
+                response.Message = "Id not found";
+                response.MessageCode = ApiMessageCodes.NotFound;
+
+                return new StandardResponseObjectResult(response, StatusCodes.Status200OK);
+            }
+
+            try
+            {
+                user.Status = UserStatus.InActive;
+                user.DateReset = _helper.GetDateTime;
+
+                _usersRepo.Update(user, "Status,DateReset");
+                int result = _usersRepo.SaveChanges();
+
+                if (result == 0)
+                {
+                    response.Message = "Error updating user";
+                    response.MessageCode = ApiMessageCodes.Failed;
+
+                    return new StandardResponseObjectResult(response, StatusCodes.Status500InternalServerError);
+                }
+
+                response.Success = true;
+                response.MessageCode = ApiMessageCodes.Success;
+                response.Message = "Success";
+
+                return new StandardResponseObjectResult(response, StatusCodes.Status202Accepted);
+            }
+            catch (Exception ex)
+            {
+                response.Message = "Exception thrown: " + ex.Message;
+                response.MessageCode = ApiMessageCodes.ExceptionThrown;
+
+                return new StandardResponseObjectResult(response, StatusCodes.Status500InternalServerError);
+            }
+        }
     }
 }

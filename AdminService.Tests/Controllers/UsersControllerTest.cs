@@ -22,7 +22,8 @@ namespace AdminService.Tests.Controllers
     public class UsersControllerTest
     {
         private Mock<IUsersRepo> _mockUsersRepo;      
-        private Mock<IPrincipal> _mockPrinciple;      
+        private Mock<IPrincipal> _mockPrinciple;
+        private Mock<IStandardHelper> _mockHelper;
 
         private UsersController _controller;
         private ControllerContext _controllerContext;
@@ -38,13 +39,14 @@ namespace AdminService.Tests.Controllers
            
             _mockUsersRepo = new Mock<IUsersRepo>(); 
             _mockPrinciple = new Mock<IPrincipal>();
-          
+            _mockHelper = new Mock<IStandardHelper>();
+
             _claims = new List<Claim>() { new Claim(ClaimTypes.Name, _userId) };
             _claimsIdentity = new ClaimsIdentity(_claims);
             _claimsPrinciple = new ClaimsPrincipal(_claimsIdentity);
             
             // arrange
-            _controller = new UsersController(_mockUsersRepo.Object);           
+            _controller = new UsersController(_mockUsersRepo.Object, _mockHelper.Object);           
             _mockPrinciple.Setup(x => x.Identity).Returns(_claimsIdentity);
             _mockPrinciple.Setup(x => x.IsInRole(It.IsAny<string>())).Returns(true);           
 
@@ -113,6 +115,82 @@ namespace AdminService.Tests.Controllers
             Assert.AreEqual("No results found", apiResponse.Message);            
 
             _mockUsersRepo.Verify(x => x.List(It.IsAny<ListUsersPost>()), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("Controllers")]
+        [Priority(0)]
+        public void Delete_Success()
+        {
+            // arrange            
+            _mockHelper.Setup(x => x.GetDateTime).Returns(DateTime.Now);
+            _mockUsersRepo.Setup(x => x.SaveChanges()).Returns(1);
+
+            // act
+            IActionResult result = _controller.Delete(_userId);
+            var standardResponse = (StandardResponseObjectResult)result;
+            var apiResponse = (ApiResponse)standardResponse.Value;
+
+            // assert
+            Assert.IsInstanceOfType(result, typeof(IActionResult), "'result' type must be of IActionResult");
+            Assert.AreEqual(StatusCodes.Status202Accepted, standardResponse.StatusCode);
+            Assert.IsTrue(apiResponse.Success);
+            Assert.AreEqual(ApiMessageCodes.Success, apiResponse.MessageCode);
+            Assert.AreEqual("Success", apiResponse.Message);          
+
+            _mockUsersRepo.Verify(x => x.Delete(It.IsAny<string>(), It.IsAny<DateTime>()), Times.Once);
+            _mockUsersRepo.Verify(x => x.SaveChanges(), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("Controllers")]
+        [Priority(0)]
+        public void Delete_NullId()
+        {
+            // arrange            
+            _mockHelper.Setup(x => x.GetDateTime).Returns(DateTime.Now);
+            _mockUsersRepo.Setup(x => x.SaveChanges()).Returns(0);
+            string userId = null;
+
+            // act
+            IActionResult result = _controller.Delete(userId);
+            var standardResponse = (StandardResponseObjectResult)result;
+            var apiResponse = (ApiResponse)standardResponse.Value;
+
+            // assert
+            Assert.IsInstanceOfType(result, typeof(IActionResult), "'result' type must be of IActionResult");
+            Assert.AreEqual(StatusCodes.Status200OK, standardResponse.StatusCode);
+            Assert.IsFalse(apiResponse.Success);
+            Assert.AreEqual(ApiMessageCodes.EmptyValue, apiResponse.MessageCode);
+            Assert.AreEqual("Id cannot be empty", apiResponse.Message);
+
+            _mockUsersRepo.Verify(x => x.Delete(It.IsAny<string>(), It.IsAny<DateTime>()), Times.Never);
+            _mockUsersRepo.Verify(x => x.SaveChanges(), Times.Never);
+        }
+
+        [TestMethod]
+        [TestCategory("Controllers")]
+        [Priority(0)]
+        public void Delete_SaveChangesError()
+        {
+            // arrange            
+            _mockHelper.Setup(x => x.GetDateTime).Returns(DateTime.Now);
+            _mockUsersRepo.Setup(x => x.SaveChanges()).Returns(0);    
+
+            // act
+            IActionResult result = _controller.Delete(_userId);
+            var standardResponse = (StandardResponseObjectResult)result;
+            var apiResponse = (ApiResponse)standardResponse.Value;
+
+            // assert
+            Assert.IsInstanceOfType(result, typeof(IActionResult), "'result' type must be of IActionResult");
+            Assert.AreEqual(StatusCodes.Status500InternalServerError, standardResponse.StatusCode);
+            Assert.IsFalse(apiResponse.Success);
+            Assert.AreEqual(ApiMessageCodes.Failed, apiResponse.MessageCode);
+            Assert.AreEqual("Error updating user", apiResponse.Message);
+
+            _mockUsersRepo.Verify(x => x.Delete(It.IsAny<string>(), It.IsAny<DateTime>()), Times.Once);
+            _mockUsersRepo.Verify(x => x.SaveChanges(), Times.Once);
         }
     }
 }

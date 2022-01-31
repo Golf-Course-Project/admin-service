@@ -10,6 +10,7 @@ namespace AdminService.Enums
         NotConfirmed = 0,
         Okay = 1,
         ForgotPassword = 2,
-        BlockedExceededLoginAttempts = 3
+        BlockedExceededLoginAttempts = 3,
+       InActive = 4
     };
 }
