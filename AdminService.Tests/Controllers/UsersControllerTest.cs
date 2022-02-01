@@ -211,5 +211,32 @@ namespace AdminService.Tests.Controllers
             _mockUsersRepo.Verify(x => x.Update(It.IsAny<User>(), It.IsAny<String>()), Times.Once);
             _mockUsersRepo.Verify(x => x.SaveChanges(), Times.Once);
         }
+
+        [TestMethod]
+        [TestCategory("Controllers")]
+        [Priority(0)]
+        public void Update_InvalidModelState()
+        {
+            // arrange
+            UserUpdatePatch patch = new UserUpdatePatch();
+
+            _controller.ModelState.AddModelError("test", "test");
+
+            // act
+            IActionResult result = _controller.Update(patch);
+            var standardResponse = (StandardResponseObjectResult)result;
+            var apiResponse = (ApiResponse)standardResponse.Value;
+
+            // assert
+            Assert.IsInstanceOfType(result, typeof(IActionResult), "'result' type must be of IActionResult");
+            Assert.AreEqual(StatusCodes.Status200OK, standardResponse.StatusCode);
+            Assert.IsFalse(apiResponse.Success);           
+            Assert.AreEqual(ApiMessageCodes.InvalidModelState, apiResponse.MessageCode);
+            Assert.AreEqual("Invalid model state", apiResponse.Message);
+
+            _mockUsersRepo.Verify(x => x.Fetch(It.IsAny<String>()), Times.Never);
+            _mockUsersRepo.Verify(x => x.Update(It.IsAny<User>(), It.IsAny<String>()), Times.Never);
+            _mockUsersRepo.Verify(x => x.SaveChanges(), Times.Never);
+        }
     }
 }
