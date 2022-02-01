@@ -87,33 +87,6 @@ namespace AdminService.Repos.Identity
             }
         }
 
-        public void Delete(string id, DateTime dateDeleted)
-        {
-            string fields = "DateDeleted,IsDeleted";
-            User result = this.Fetch(id);
-
-            if (result == null)
-            {
-                result = null;
-            }
-            else
-            {
-                result.DateDeleted = dateDeleted;
-                result.IsDeleted = true;
-
-                _dbContext.Users.Attach(result);
-
-                EntityEntry entry = this._dbContext.Entry(result);
-
-                var split = fields.Split(',');
-
-                for (var i = 0; i < split.Count(); ++i)
-                {
-                    entry.Property(split[i].ToString().Trim()).IsModified = true;
-                }
-            }
-        }
-
         public void Restore(string id)
         {
             string fields = "DateDeleted,IsDeleted";
@@ -193,7 +166,6 @@ namespace AdminService.Repos.Identity
         IEnumerable<UserList> List(ListUsersPost search);
         void Create(User item);     
         void Update(User item, string fields);
-        void Delete(string id, DateTime dateDeleted);
         public int SaveChanges();
         void Restore(string id);
         void Destroy(string id);

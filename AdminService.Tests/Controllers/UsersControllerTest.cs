@@ -15,6 +15,8 @@ using AdminService.Repos.Identity;
 using AdminService.Misc;
 using AdminService.ViewModels.Identity;
 using AdminService.Enums;
+using AdminService.Entities.Identity;
+using System.Security.Cryptography.X509Certificates;
 
 namespace AdminService.Tests.Controllers
 {
@@ -120,14 +122,18 @@ namespace AdminService.Tests.Controllers
         [TestMethod]
         [TestCategory("Controllers")]
         [Priority(0)]
-        public void Delete_Success()
+        public void Update_Delete_Success()
         {
-            // arrange            
+            // arrange
+            UserUpdatePatch patch = new UserUpdatePatch() { Id = _userId, Action = "delete" };
+            User user = new User();
+            
             _mockHelper.Setup(x => x.GetDateTime).Returns(DateTime.Now);
             _mockUsersRepo.Setup(x => x.SaveChanges()).Returns(1);
+            _mockUsersRepo.Setup(x => x.Fetch(It.IsAny<String>())).Returns(user);
 
             // act
-            IActionResult result = _controller.Delete(_userId);
+            IActionResult result = _controller.Update(patch);
             var standardResponse = (StandardResponseObjectResult)result;
             var apiResponse = (ApiResponse)standardResponse.Value;
 
@@ -135,61 +141,74 @@ namespace AdminService.Tests.Controllers
             Assert.IsInstanceOfType(result, typeof(IActionResult), "'result' type must be of IActionResult");
             Assert.AreEqual(StatusCodes.Status202Accepted, standardResponse.StatusCode);
             Assert.IsTrue(apiResponse.Success);
+            Assert.IsTrue(user.IsDeleted);
             Assert.AreEqual(ApiMessageCodes.Success, apiResponse.MessageCode);
-            Assert.AreEqual("Success", apiResponse.Message);          
+            Assert.AreEqual("Success", apiResponse.Message);
 
-            _mockUsersRepo.Verify(x => x.Delete(It.IsAny<string>(), It.IsAny<DateTime>()), Times.Once);
+            _mockUsersRepo.Verify(x => x.Fetch(It.IsAny<String>()), Times.Once);
+            _mockUsersRepo.Verify(x => x.Update(It.IsAny<User>(), It.IsAny<String>()), Times.Once);
             _mockUsersRepo.Verify(x => x.SaveChanges(), Times.Once);
         }
 
         [TestMethod]
         [TestCategory("Controllers")]
         [Priority(0)]
-        public void Delete_NullId()
+        public void Update_Activate_Success()
         {
-            // arrange            
+            // arrange
+            UserUpdatePatch patch = new UserUpdatePatch() { Id = _userId, Action = "activate" };
+            User user = new User();
+
             _mockHelper.Setup(x => x.GetDateTime).Returns(DateTime.Now);
-            _mockUsersRepo.Setup(x => x.SaveChanges()).Returns(0);
-            string userId = null;
+            _mockUsersRepo.Setup(x => x.SaveChanges()).Returns(1);
+            _mockUsersRepo.Setup(x => x.Fetch(It.IsAny<String>())).Returns(user);
 
             // act
-            IActionResult result = _controller.Delete(userId);
+            IActionResult result = _controller.Update(patch);
             var standardResponse = (StandardResponseObjectResult)result;
             var apiResponse = (ApiResponse)standardResponse.Value;
 
             // assert
             Assert.IsInstanceOfType(result, typeof(IActionResult), "'result' type must be of IActionResult");
-            Assert.AreEqual(StatusCodes.Status200OK, standardResponse.StatusCode);
-            Assert.IsFalse(apiResponse.Success);
-            Assert.AreEqual(ApiMessageCodes.EmptyValue, apiResponse.MessageCode);
-            Assert.AreEqual("Id cannot be empty", apiResponse.Message);
+            Assert.AreEqual(StatusCodes.Status202Accepted, standardResponse.StatusCode);
+            Assert.IsTrue(apiResponse.Success);
+            Assert.AreEqual(UserStatus.Okay, user.Status);
+            Assert.AreEqual(ApiMessageCodes.Success, apiResponse.MessageCode);
+            Assert.AreEqual("Success", apiResponse.Message);
 
-            _mockUsersRepo.Verify(x => x.Delete(It.IsAny<string>(), It.IsAny<DateTime>()), Times.Never);
-            _mockUsersRepo.Verify(x => x.SaveChanges(), Times.Never);
+            _mockUsersRepo.Verify(x => x.Fetch(It.IsAny<String>()), Times.Once);
+            _mockUsersRepo.Verify(x => x.Update(It.IsAny<User>(), It.IsAny<String>()), Times.Once);
+            _mockUsersRepo.Verify(x => x.SaveChanges(), Times.Once);
         }
 
         [TestMethod]
         [TestCategory("Controllers")]
         [Priority(0)]
-        public void Delete_SaveChangesError()
+        public void Update_DeActivate_Success()
         {
-            // arrange            
+            // arrange
+            UserUpdatePatch patch = new UserUpdatePatch() { Id = _userId, Action = "deactivate" };
+            User user = new User();
+
             _mockHelper.Setup(x => x.GetDateTime).Returns(DateTime.Now);
-            _mockUsersRepo.Setup(x => x.SaveChanges()).Returns(0);    
+            _mockUsersRepo.Setup(x => x.SaveChanges()).Returns(1);
+            _mockUsersRepo.Setup(x => x.Fetch(It.IsAny<String>())).Returns(user);
 
             // act
-            IActionResult result = _controller.Delete(_userId);
+            IActionResult result = _controller.Update(patch);
             var standardResponse = (StandardResponseObjectResult)result;
             var apiResponse = (ApiResponse)standardResponse.Value;
 
             // assert
             Assert.IsInstanceOfType(result, typeof(IActionResult), "'result' type must be of IActionResult");
-            Assert.AreEqual(StatusCodes.Status500InternalServerError, standardResponse.StatusCode);
-            Assert.IsFalse(apiResponse.Success);
-            Assert.AreEqual(ApiMessageCodes.Failed, apiResponse.MessageCode);
-            Assert.AreEqual("Error updating user", apiResponse.Message);
+            Assert.AreEqual(StatusCodes.Status202Accepted, standardResponse.StatusCode);
+            Assert.IsTrue(apiResponse.Success);
+            Assert.AreEqual(UserStatus.InActive, user.Status);
+            Assert.AreEqual(ApiMessageCodes.Success, apiResponse.MessageCode);
+            Assert.AreEqual("Success", apiResponse.Message);
 
-            _mockUsersRepo.Verify(x => x.Delete(It.IsAny<string>(), It.IsAny<DateTime>()), Times.Once);
+            _mockUsersRepo.Verify(x => x.Fetch(It.IsAny<String>()), Times.Once);
+            _mockUsersRepo.Verify(x => x.Update(It.IsAny<User>(), It.IsAny<String>()), Times.Once);
             _mockUsersRepo.Verify(x => x.SaveChanges(), Times.Once);
         }
     }

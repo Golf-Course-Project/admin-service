@@ -21,6 +21,6 @@ namespace AdminService.Entities.Identity
         public DateTime? DateReset { get; set; }
         public DateTime? DateDeleted { get; set; }
         public DateTime DateCreated { get; }
-        public DateTime? DateUpdated { get; }
+        public DateTime DateUpdated { get; set; }
     }
 }
