@@ -238,5 +238,137 @@ namespace AdminService.Tests.Controllers
             _mockUsersRepo.Verify(x => x.Update(It.IsAny<User>(), It.IsAny<String>()), Times.Never);
             _mockUsersRepo.Verify(x => x.SaveChanges(), Times.Never);
         }
+
+        [TestMethod]
+        [TestCategory("Controllers")]
+        [Priority(0)]
+        public void Update_BodyIsNull()
+        {
+            // arrange
+            UserUpdatePatch patch = null;
+
+            // act
+            IActionResult result = _controller.Update(patch);
+            var standardResponse = (StandardResponseObjectResult)result;
+            var apiResponse = (ApiResponse)standardResponse.Value;
+
+            // assert
+            Assert.IsInstanceOfType(result, typeof(IActionResult), "'result' type must be of IActionResult");
+            Assert.AreEqual(StatusCodes.Status200OK, standardResponse.StatusCode);
+            Assert.IsFalse(apiResponse.Success);
+            Assert.AreEqual(ApiMessageCodes.NullValue, apiResponse.MessageCode);
+            Assert.AreEqual("Body cannot be null", apiResponse.Message);
+
+            _mockUsersRepo.Verify(x => x.Fetch(It.IsAny<String>()), Times.Never);
+            _mockUsersRepo.Verify(x => x.Update(It.IsAny<User>(), It.IsAny<String>()), Times.Never);
+            _mockUsersRepo.Verify(x => x.SaveChanges(), Times.Never);
+        }
+
+        [TestMethod]
+        [TestCategory("Controllers")]
+        [Priority(0)]
+        public void Update_EmptyPatchValues()
+        {
+            // arrange
+            UserUpdatePatch patch = new UserUpdatePatch();
+
+            // act
+            IActionResult result = _controller.Update(patch);
+            var standardResponse = (StandardResponseObjectResult)result;
+            var apiResponse = (ApiResponse)standardResponse.Value;
+
+            // assert
+            Assert.IsInstanceOfType(result, typeof(IActionResult), "'result' type must be of IActionResult");
+            Assert.AreEqual(StatusCodes.Status200OK, standardResponse.StatusCode);
+            Assert.IsFalse(apiResponse.Success);
+            Assert.AreEqual(ApiMessageCodes.NullValue, apiResponse.MessageCode);
+            Assert.AreEqual("Empty patch values", apiResponse.Message);
+
+            _mockUsersRepo.Verify(x => x.Fetch(It.IsAny<String>()), Times.Never);
+            _mockUsersRepo.Verify(x => x.Update(It.IsAny<User>(), It.IsAny<String>()), Times.Never);
+            _mockUsersRepo.Verify(x => x.SaveChanges(), Times.Never);
+        }
+
+        [TestMethod]
+        [TestCategory("Controllers")]
+        [Priority(0)]
+        public void Update_InvalidAction()
+        {
+            // arrange
+            UserUpdatePatch patch = new UserUpdatePatch() { Id = _userId, Action = "badvalue" };
+           
+            // act
+            IActionResult result = _controller.Update(patch);
+            var standardResponse = (StandardResponseObjectResult)result;
+            var apiResponse = (ApiResponse)standardResponse.Value;
+
+            // assert
+            Assert.IsInstanceOfType(result, typeof(IActionResult), "'result' type must be of IActionResult");
+            Assert.AreEqual(StatusCodes.Status200OK, standardResponse.StatusCode);
+            Assert.IsFalse(apiResponse.Success);
+            Assert.AreEqual(ApiMessageCodes.InvalidParamValue, apiResponse.MessageCode);
+            Assert.AreEqual("Invalid action method", apiResponse.Message);
+
+            _mockUsersRepo.Verify(x => x.Fetch(It.IsAny<String>()), Times.Never);
+            _mockUsersRepo.Verify(x => x.Update(It.IsAny<User>(), It.IsAny<String>()), Times.Never);
+            _mockUsersRepo.Verify(x => x.SaveChanges(), Times.Never);
+        }
+
+        [TestMethod]
+        [TestCategory("Controllers")]
+        [Priority(0)]
+        public void Update_UserFetchIsNull()
+        {
+            // arrange
+            UserUpdatePatch patch = new UserUpdatePatch() { Id = _userId, Action = "delete" };
+            User user = null;
+
+            _mockUsersRepo.Setup(x => x.Fetch(It.IsAny<String>())).Returns(user);
+
+            // act
+            IActionResult result = _controller.Update(patch);
+            var standardResponse = (StandardResponseObjectResult)result;
+            var apiResponse = (ApiResponse)standardResponse.Value;
+
+            // assert
+            Assert.IsInstanceOfType(result, typeof(IActionResult), "'result' type must be of IActionResult");
+            Assert.AreEqual(StatusCodes.Status200OK, standardResponse.StatusCode);
+            Assert.IsFalse(apiResponse.Success);
+            Assert.AreEqual(ApiMessageCodes.NotFound, apiResponse.MessageCode);
+            Assert.AreEqual("User not found", apiResponse.Message);
+
+            _mockUsersRepo.Verify(x => x.Fetch(It.IsAny<String>()), Times.Once);
+            _mockUsersRepo.Verify(x => x.Update(It.IsAny<User>(), It.IsAny<String>()), Times.Never);
+            _mockUsersRepo.Verify(x => x.SaveChanges(), Times.Never);
+        }
+
+        [TestMethod]
+        [TestCategory("Controllers")]
+        [Priority(0)]
+        public void Update_ErrorSaveChanges()
+        {
+            // arrange
+            UserUpdatePatch patch = new UserUpdatePatch() { Id = _userId, Action = "delete" };
+            User user = new User();
+
+            _mockUsersRepo.Setup(x => x.Fetch(It.IsAny<String>())).Returns(user);
+            _mockUsersRepo.Setup(x => x.SaveChanges()).Returns(0);
+
+            // act
+            IActionResult result = _controller.Update(patch);
+            var standardResponse = (StandardResponseObjectResult)result;
+            var apiResponse = (ApiResponse)standardResponse.Value;
+
+            // assert
+            Assert.IsInstanceOfType(result, typeof(IActionResult), "'result' type must be of IActionResult");
+            Assert.AreEqual(StatusCodes.Status500InternalServerError, standardResponse.StatusCode);
+            Assert.IsFalse(apiResponse.Success);
+            Assert.AreEqual(ApiMessageCodes.Failed, apiResponse.MessageCode);
+            Assert.IsTrue(apiResponse.Message.Contains("Error updating user"));
+
+            _mockUsersRepo.Verify(x => x.Fetch(It.IsAny<String>()), Times.Once);
+            _mockUsersRepo.Verify(x => x.Update(It.IsAny<User>(), It.IsAny<String>()), Times.Once);
+            _mockUsersRepo.Verify(x => x.SaveChanges(), Times.Once);
+        }
     }
 }

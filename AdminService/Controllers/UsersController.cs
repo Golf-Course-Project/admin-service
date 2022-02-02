@@ -100,7 +100,15 @@ namespace AdminService.Controllers
                 return new StandardResponseObjectResult(response, StatusCodes.Status200OK);
             }
 
-            if (! actions.Any(actions.Contains))
+            if (String.IsNullOrEmpty(body.Id) || String.IsNullOrEmpty(body.Action))
+            {
+                response.MessageCode = ApiMessageCodes.NullValue;
+                response.Message = "Empty patch values";
+
+                return new StandardResponseObjectResult(response, StatusCodes.Status200OK);
+            }
+
+            if (! actions.Contains(body.Action))
             {
                 response.MessageCode = ApiMessageCodes.InvalidParamValue;
                 response.Message = "Invalid action method";
