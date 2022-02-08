@@ -26,6 +26,9 @@ namespace AdminService.ViewModels.Identity
         [JsonProperty(PropertyName = "statusText")]
         public string StatusText { get; set; }
 
+        [JsonProperty(PropertyName = "isLocked")]
+        public Boolean IsLocked { get; set; }
+
         [JsonProperty(PropertyName = "loginAttempts")]
         public int LoginAttempts { get; set; }    
 
@@ -37,6 +40,9 @@ namespace AdminService.ViewModels.Identity
 
         [JsonProperty(PropertyName = "dateLastAttempt")]
         public DateTime? DateLastAttempt { get; set; }
+
+        [JsonProperty(PropertyName = "dateLocked")]
+        public DateTime? DateLocked { get; set; }
 
         [JsonProperty(PropertyName = "rowNumber")]
         public Int64 RowNumber { get; set; }
