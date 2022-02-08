@@ -153,11 +153,11 @@ namespace AdminService.Tests.Controllers
         [TestMethod]
         [TestCategory("Controllers")]
         [Priority(0)]
-        public void Update_Activate_Success()
+        public void Update_Reset_Success()
         {
             // arrange
-            UserUpdatePatch patch = new UserUpdatePatch() { Id = _userId, Action = "activate" };
-            User user = new User();
+            UserUpdatePatch patch = new UserUpdatePatch() { Id = _userId, Action = "reset" };
+            User user = new User() {  Status = UserStatus.ExceededLoginAttempts };
 
             _mockHelper.Setup(x => x.GetDateTime).Returns(DateTime.Now);
             _mockUsersRepo.Setup(x => x.SaveChanges()).Returns(1);
@@ -184,10 +184,10 @@ namespace AdminService.Tests.Controllers
         [TestMethod]
         [TestCategory("Controllers")]
         [Priority(0)]
-        public void Update_DeActivate_Success()
+        public void Update_Lock_Success()
         {
             // arrange
-            UserUpdatePatch patch = new UserUpdatePatch() { Id = _userId, Action = "deactivate" };
+            UserUpdatePatch patch = new UserUpdatePatch() { Id = _userId, Action = "lock" };
             User user = new User();
 
             _mockHelper.Setup(x => x.GetDateTime).Returns(DateTime.Now);
@@ -203,13 +203,73 @@ namespace AdminService.Tests.Controllers
             Assert.IsInstanceOfType(result, typeof(IActionResult), "'result' type must be of IActionResult");
             Assert.AreEqual(StatusCodes.Status202Accepted, standardResponse.StatusCode);
             Assert.IsTrue(apiResponse.Success);
-            Assert.AreEqual(UserStatus.InActive, user.Status);
             Assert.AreEqual(ApiMessageCodes.Success, apiResponse.MessageCode);
             Assert.AreEqual("Success", apiResponse.Message);
 
             _mockUsersRepo.Verify(x => x.Fetch(It.IsAny<String>()), Times.Once);
             _mockUsersRepo.Verify(x => x.Update(It.IsAny<User>(), It.IsAny<String>()), Times.Once);
             _mockUsersRepo.Verify(x => x.SaveChanges(), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("Controllers")]
+        [Priority(0)]
+        public void Update_UnLock_Success()
+        {
+            // arrange
+            UserUpdatePatch patch = new UserUpdatePatch() { Id = _userId, Action = "unlock" };
+            User user = new User();
+
+            _mockHelper.Setup(x => x.GetDateTime).Returns(DateTime.Now);
+            _mockUsersRepo.Setup(x => x.SaveChanges()).Returns(1);
+            _mockUsersRepo.Setup(x => x.Fetch(It.IsAny<String>())).Returns(user);
+
+            // act
+            IActionResult result = _controller.Update(patch);
+            var standardResponse = (StandardResponseObjectResult)result;
+            var apiResponse = (ApiResponse)standardResponse.Value;
+
+            // assert
+            Assert.IsInstanceOfType(result, typeof(IActionResult), "'result' type must be of IActionResult");
+            Assert.AreEqual(StatusCodes.Status202Accepted, standardResponse.StatusCode);
+            Assert.IsTrue(apiResponse.Success);            
+            Assert.AreEqual(ApiMessageCodes.Success, apiResponse.MessageCode);
+            Assert.AreEqual("Success", apiResponse.Message);
+
+            _mockUsersRepo.Verify(x => x.Fetch(It.IsAny<String>()), Times.Once);
+            _mockUsersRepo.Verify(x => x.Update(It.IsAny<User>(), It.IsAny<String>()), Times.Once);
+            _mockUsersRepo.Verify(x => x.SaveChanges(), Times.Once);
+        }
+
+
+        [TestMethod]
+        [TestCategory("Controllers")]
+        [Priority(0)]
+        public void Update_Reset_InvalidCurrentStatus()
+        {
+            // arrange
+            UserUpdatePatch patch = new UserUpdatePatch() { Id = _userId, Action = "reset" };
+            User user = new User() { Status = UserStatus.NotConfirmed };
+
+            _mockHelper.Setup(x => x.GetDateTime).Returns(DateTime.Now);
+            _mockUsersRepo.Setup(x => x.SaveChanges()).Returns(1);
+            _mockUsersRepo.Setup(x => x.Fetch(It.IsAny<String>())).Returns(user);
+
+            // act
+            IActionResult result = _controller.Update(patch);
+            var standardResponse = (StandardResponseObjectResult)result;
+            var apiResponse = (ApiResponse)standardResponse.Value;
+
+            // assert
+            Assert.IsInstanceOfType(result, typeof(IActionResult), "'result' type must be of IActionResult");
+            Assert.AreEqual(StatusCodes.Status200OK, standardResponse.StatusCode);
+            Assert.IsFalse(apiResponse.Success);           
+            Assert.AreEqual(ApiMessageCodes.Failed, apiResponse.MessageCode);
+            Assert.AreEqual("Users current status is not eligible for reset", apiResponse.Message);
+
+            _mockUsersRepo.Verify(x => x.Fetch(It.IsAny<String>()), Times.Once);
+            _mockUsersRepo.Verify(x => x.Update(It.IsAny<User>(), It.IsAny<String>()), Times.Never);
+            _mockUsersRepo.Verify(x => x.SaveChanges(), Times.Never);
         }
 
         [TestMethod]

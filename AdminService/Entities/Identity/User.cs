@@ -16,11 +16,12 @@ namespace AdminService.Entities.Identity
         public string IPAddress {get; set;}
         public Enums.UserStatus Status { get; set; } = Enums.UserStatus.NotConfirmed;
         public int LoginAttempts { get; set; }       
-        public bool IsDeleted { get; set; } = false;     
-        public DateTime? DateLastAttempt { get; set; }
-        public DateTime? DateReset { get; set; }
+        public bool IsDeleted { get; set; } = false;
+        public bool IsLocked { get; set; } = false;
+        public DateTime? DateLastAttempt { get; set; }  
+        public DateTime? DateLocked { get; set; }
         public DateTime? DateDeleted { get; set; }
         public DateTime DateCreated { get; }
-        public DateTime DateUpdated { get; set; }
+        public DateTime? DateUpdated { get; set; }
     }
 }

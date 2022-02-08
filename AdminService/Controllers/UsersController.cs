@@ -78,11 +78,11 @@ namespace AdminService.Controllers
         }
 
         [HttpPatch]
-        [Route("update/{id}")]
+        [Route("update")]
         public IActionResult Update ([FromBody] UserUpdatePatch body)
         {
             ApiResponse response = new ApiResponse();
-            string[] actions = { "delete", "activate", "deactivate" };
+            string[] actions = { "delete", "unlock", "lock", "reset" };
 
             if (!ModelState.IsValid)
             {
@@ -126,6 +126,15 @@ namespace AdminService.Controllers
                 return new StandardResponseObjectResult(response, StatusCodes.Status200OK);
             }
 
+            // only a status of exceeded login attempts can be reset
+            if (user.Status != UserStatus.ExceededLoginAttempts && body.Action == "reset")
+            {
+                response.Message = "Users current status is not eligible for reset";
+                response.MessageCode = ApiMessageCodes.Failed;
+
+                return new StandardResponseObjectResult(response, StatusCodes.Status200OK);
+            }
+
             string fields = "DateDeleted,IsDeleted";
             DateTime date = _helper.GetDateTime;
             user.DateUpdated = date;
@@ -137,14 +146,20 @@ namespace AdminService.Controllers
                     user.DateDeleted = date;                   
                     user.IsDeleted = true; 
                     break;
-                case "activate":
-                    fields = "Status,DateReset,DateUpdated";
-                    user.Status = UserStatus.Okay;
-                    user.DateReset = date;
+                case "unlock":
+                    fields = "IsLocked,DateLocked";
+                    user.IsLocked = false;
+                    user.DateLocked = null;
                     break;
-                case "deactivate":
-                    fields = "Status,DateUpdated";
-                    user.Status = UserStatus.InActive;                
+                case "lock":
+                    fields = "DateLocked,IsLocked";
+                    user.IsLocked = true;
+                    user.DateLocked = date;
+                    break;
+                case "reset":
+                    fields = "Status,LoginAttempts,DateUpdated";
+                    user.Status = UserStatus.Okay;
+                    user.LoginAttempts = 0;
                     break;
             }
 
