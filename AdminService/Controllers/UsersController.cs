@@ -77,12 +77,13 @@ namespace AdminService.Controllers
             return new StandardResponseObjectResult(response, StatusCodes.Status200OK);
         }
 
-        [HttpPatch]
+        [HttpPost]
         [Route("update")]
         public IActionResult Update ([FromBody] UserUpdatePatch body)
         {
             ApiResponse response = new ApiResponse();
-            string[] actions = { "delete", "unlock", "lock", "reset" };
+            string[] actions = { "delete", "unlock", "lock", "reset", "changerole" };
+            string[] roles = { "basic", "site admin" };
 
             if (!ModelState.IsValid)
             {
@@ -116,6 +117,17 @@ namespace AdminService.Controllers
                 return new StandardResponseObjectResult(response, StatusCodes.Status200OK);
             }
 
+            if (body.Action.ToLower() == "changerole")
+            {
+                if (!roles.Contains(body.Role))
+                {
+                    response.MessageCode = ApiMessageCodes.InvalidParamValue;
+                    response.Message = "Invalid role value";
+
+                    return new StandardResponseObjectResult(response, StatusCodes.Status200OK);
+                }
+            }
+
             User user = _usersRepo.Fetch(body.Id.ToLower());
 
             if (user == null)
@@ -135,7 +147,7 @@ namespace AdminService.Controllers
                 return new StandardResponseObjectResult(response, StatusCodes.Status200OK);
             }
 
-            string fields = "DateDeleted,IsDeleted";
+            string fields = "";
             DateTime date = _helper.GetDateTime;
             user.DateUpdated = date;
 
@@ -160,6 +172,10 @@ namespace AdminService.Controllers
                     fields = "Status,LoginAttempts,DateUpdated";
                     user.Status = UserStatus.Okay;
                     user.LoginAttempts = 0;
+                    break;
+                case "changerole":
+                    fields = "DateUpdated,Role";
+                    user.Role = body.Role.ToLower();
                     break;
             }
 
