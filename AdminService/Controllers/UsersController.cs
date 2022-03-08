@@ -82,7 +82,7 @@ namespace AdminService.Controllers
         public IActionResult Update ([FromBody] UserUpdatePatch body)
         {
             ApiResponse response = new ApiResponse();
-            string[] actions = { "delete", "unlock", "lock", "reset", "changerole" };
+            string[] actions = { "delete", "unlock", "lock", "reset", "changerole", "restore" };
             string[] roles = { "basic", "site admin" };
 
             if (!ModelState.IsValid)
@@ -176,6 +176,11 @@ namespace AdminService.Controllers
                 case "changerole":
                     fields = "DateUpdated,Role";
                     user.Role = body.Role.ToLower();
+                    break;
+                case "restore":
+                    fields = "IsDeleted,DateDeleted,DateUpdated";
+                    user.IsDeleted = false;
+                    user.DateDeleted = null;
                     break;
             }
 
