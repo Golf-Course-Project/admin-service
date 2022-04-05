@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace AdminService.ViewModels.Identity
 {
-    public class TokenList
+    public class Tokens
     {
         [JsonProperty(PropertyName = "id")]
         public string Id { get; set; }

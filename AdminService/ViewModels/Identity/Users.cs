@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace AdminService.ViewModels.Identity
 {
-    public class UserList
+    public class Users
     {              
         [Key]
         [JsonProperty(PropertyName = "id")]

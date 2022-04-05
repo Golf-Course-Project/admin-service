@@ -49,13 +49,13 @@ namespace AdminService.Repos.Identity
             return item;            
         }
 
-        public IEnumerable<TokenList> List(string organizationId = "")
+        public IEnumerable<Tokens> List(string organizationId = "")
         {
-            IEnumerable<TokenList> results;
+            IEnumerable<Tokens> results;
 
             try
             {
-                results = this._dbContextForSp.TokenList.FromSqlRaw<TokenList>("EXEC [dbo].[spListUserTokens]").ToList<TokenList>();
+                results = this._dbContextForSp.Tokens.FromSqlRaw<Tokens>("EXEC [dbo].[spListUserTokens]").ToList<Tokens>();
             }
             catch (Exception)
             {
@@ -71,7 +71,7 @@ namespace AdminService.Repos.Identity
 
             if (result == null)
             {
-                throw new ArgumentNullException("usertoken", "token not found");
+                throw new ArgumentNullException("token", "token not found");
             }            
 
             _dbContext.Tokens.Remove(result);
@@ -116,7 +116,7 @@ namespace AdminService.Repos.Identity
     public interface ITokensRepo
     {      
         Token Fetch(string token);
-        IEnumerable<TokenList> List(string organizationId = "");
+        IEnumerable<Tokens> List(string organizationId = "");
         void Destroy(string id);
         int SaveChanges();
     }

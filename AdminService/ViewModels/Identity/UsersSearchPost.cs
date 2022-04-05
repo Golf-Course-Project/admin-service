@@ -5,9 +5,9 @@ using Newtonsoft.Json;
 
 namespace AdminService.ViewModels.Identity
 {
-    public class ListUsersPost
+    public class UsersSearchPost
     {
-        public ListUsersPost()
+        public UsersSearchPost()
         {
             Name = null;
             Email = null;

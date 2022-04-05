@@ -16,8 +16,9 @@ namespace AdminService.Data
 
         }
 
-        public DbSet<TokenList> TokenList { get; set; }
-        public DbSet<UserList> UserList { get; set; }
+        public DbSet<Tokens> Tokens { get; set; }
+        public DbSet<Users> Users { get; set; }
+        public DbSet<DeletedUsers> DeletedUsers { get; set; }
         public DbSet<CodesListWithUser> CodesListWithUser { get; set; }
     }
 }

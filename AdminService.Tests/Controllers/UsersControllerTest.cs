@@ -67,15 +67,15 @@ namespace AdminService.Tests.Controllers
         public void List_Success()
         {
             // arrange            
-            IEnumerable<UserList> list = new List<UserList>() {
-                new UserList() { Id = "66d10d84-d450-4002-bb67-9fb0bb0f5a46" },
-                new UserList() { Id = "1a880bc6-8ad5-4532-aa02-e9b2d5f3db2a" },
-                new UserList() { Id = "f750ba46-4f87-45d0-9509-3cdd5bfffaa6" }
+            IEnumerable<Users> list = new List<Users>() {
+                new Users() { Id = "66d10d84-d450-4002-bb67-9fb0bb0f5a46" },
+                new Users() { Id = "1a880bc6-8ad5-4532-aa02-e9b2d5f3db2a" },
+                new Users() { Id = "f750ba46-4f87-45d0-9509-3cdd5bfffaa6" }
             };
 
-            ListUsersPost body = new ListUsersPost();
+            UsersSearchPost body = new UsersSearchPost();
 
-            _mockUsersRepo.Setup(x => x.List(It.IsAny<ListUsersPost>())).Returns(list);
+            _mockUsersRepo.Setup(x => x.List(It.IsAny<UsersSearchPost>())).Returns(list);
 
             // act
             IActionResult result = _controller.List(body);
@@ -90,7 +90,7 @@ namespace AdminService.Tests.Controllers
             Assert.AreEqual("Success", apiResponse.Message);
             Assert.IsTrue(apiResponse.Count == 3);
 
-            _mockUsersRepo.Verify(x => x.List(It.IsAny<ListUsersPost>()), Times.Once);
+            _mockUsersRepo.Verify(x => x.List(It.IsAny<UsersSearchPost>()), Times.Once);
         }
 
         [TestMethod]
@@ -99,10 +99,10 @@ namespace AdminService.Tests.Controllers
         public void List_NoResults()
         {
             // arrange            
-            IEnumerable<UserList> list = null;
-            ListUsersPost body = new ListUsersPost();
+            IEnumerable<Users> list = null;
+            UsersSearchPost body = new UsersSearchPost();
 
-            _mockUsersRepo.Setup(x => x.List(It.IsAny<ListUsersPost>())).Returns(list);
+            _mockUsersRepo.Setup(x => x.List(It.IsAny<UsersSearchPost>())).Returns(list);
 
             // act
             IActionResult result = _controller.List(body);
@@ -116,7 +116,7 @@ namespace AdminService.Tests.Controllers
             Assert.AreEqual(ApiMessageCodes.NoResults, apiResponse.MessageCode);
             Assert.AreEqual("No results found", apiResponse.Message);            
 
-            _mockUsersRepo.Verify(x => x.List(It.IsAny<ListUsersPost>()), Times.Once);
+            _mockUsersRepo.Verify(x => x.List(It.IsAny<UsersSearchPost>()), Times.Once);
         }
 
         [TestMethod]
@@ -212,7 +212,6 @@ namespace AdminService.Tests.Controllers
             _mockUsersRepo.Verify(x => x.SaveChanges(), Times.Once);
         }
 
-
         [TestMethod]
         [TestCategory("Controllers")]
         [Priority(0)]
@@ -243,7 +242,6 @@ namespace AdminService.Tests.Controllers
             _mockUsersRepo.Verify(x => x.Update(It.IsAny<User>(), It.IsAny<String>()), Times.Once);
             _mockUsersRepo.Verify(x => x.SaveChanges(), Times.Once);
         }
-
 
         [TestMethod]
         [TestCategory("Controllers")]
@@ -305,7 +303,6 @@ namespace AdminService.Tests.Controllers
             _mockUsersRepo.Verify(x => x.SaveChanges(), Times.Once);
         }
 
-
         [TestMethod]
         [TestCategory("Controllers")]
         [Priority(0)]
@@ -335,7 +332,6 @@ namespace AdminService.Tests.Controllers
             _mockUsersRepo.Verify(x => x.Update(It.IsAny<User>(), It.IsAny<String>()), Times.Never);
             _mockUsersRepo.Verify(x => x.SaveChanges(), Times.Never);
         }
-
 
         [TestMethod]
         [TestCategory("Controllers")]
@@ -524,6 +520,64 @@ namespace AdminService.Tests.Controllers
             _mockUsersRepo.Verify(x => x.Fetch(It.IsAny<String>()), Times.Once);
             _mockUsersRepo.Verify(x => x.Update(It.IsAny<User>(), It.IsAny<String>()), Times.Once);
             _mockUsersRepo.Verify(x => x.SaveChanges(), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("Controllers")]
+        [Priority(0)]
+        public void List_Deleted_Success()
+        {
+            // arrange
+            DeletedUsersSearchPost search = new DeletedUsersSearchPost() { Name = null };
+
+            IEnumerable<DeletedUsers> list = new List<DeletedUsers>() {
+                new DeletedUsers() { Id = "66d10d84-d450-4002-bb67-9fb0bb0f5a46" },
+                new DeletedUsers() { Id = "1a880bc6-8ad5-4532-aa02-e9b2d5f3db2a" },
+                new DeletedUsers() { Id = "f750ba46-4f87-45d0-9509-3cdd5bfffaa6" }
+            };            
+
+            _mockUsersRepo.Setup(x => x.ListDeleted(It.IsAny<DeletedUsersSearchPost>())).Returns(list);
+
+            // act
+            IActionResult result = _controller.Deleted(search);
+            var standardResponse = (StandardResponseObjectResult)result;
+            var apiResponse = (ApiResponse)standardResponse.Value;
+
+            // assert
+            Assert.IsInstanceOfType(result, typeof(IActionResult), "'result' type must be of IActionResult");
+            Assert.AreEqual(StatusCodes.Status200OK, standardResponse.StatusCode);
+            Assert.IsTrue(apiResponse.Success);
+            Assert.AreEqual(ApiMessageCodes.Success, apiResponse.MessageCode);
+            Assert.AreEqual("Success", apiResponse.Message);
+            Assert.IsTrue(apiResponse.Count == 3);
+
+            _mockUsersRepo.Verify(x => x.ListDeleted(It.IsAny<DeletedUsersSearchPost>()), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("Controllers")]
+        [Priority(0)]
+        public void List_Deleted_NoResults()
+        {
+            // arrange            
+            DeletedUsersSearchPost search = new DeletedUsersSearchPost() { Name = "cosmo kramer" };
+            IEnumerable<DeletedUsers> list = null;
+
+            _mockUsersRepo.Setup(x => x.ListDeleted(It.IsAny<DeletedUsersSearchPost>())).Returns(list);
+
+            // act
+            IActionResult result = _controller.Deleted(search);
+            var standardResponse = (StandardResponseObjectResult)result;
+            var apiResponse = (ApiResponse)standardResponse.Value;
+
+            // assert
+            Assert.IsInstanceOfType(result, typeof(IActionResult), "'result' type must be of IActionResult");
+            Assert.AreEqual(StatusCodes.Status200OK, standardResponse.StatusCode);
+            Assert.IsFalse(apiResponse.Success);
+            Assert.AreEqual(ApiMessageCodes.NoResults, apiResponse.MessageCode);
+            Assert.AreEqual("No results found", apiResponse.Message);            
+
+            _mockUsersRepo.Verify(x => x.ListDeleted(It.IsAny<DeletedUsersSearchPost>()), Times.Once);
         }
     }
 }

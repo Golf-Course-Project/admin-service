@@ -44,16 +44,33 @@ namespace AdminService.Repos.Identity
             return item;
         }
 
-        public IEnumerable<UserList> List(ListUsersPost search)
+        public IEnumerable<Users> List(UsersSearchPost search)
         {
-            IEnumerable<UserList> results;
+            IEnumerable<Users> results;
+
             try
             {
-                results = _dbContextForSp.UserList.FromSqlRaw<UserList>("EXEC [dbo].[spListUsers] @Name, @Email, @Status, @Role",
+                results = _dbContextForSp.Users.FromSqlRaw<Users>("EXEC [dbo].[spListUsers] @Name, @Email, @Status, @Role",
                     new SqlParameter("@Name", string.IsNullOrEmpty(search.Name) ? DBNull.Value : search.Name),
                     new SqlParameter("@Email", string.IsNullOrEmpty(search.Email) ? DBNull.Value : search.Email),                 
                     new SqlParameter("@Status", search.Status),
-                    new SqlParameter("@Role", string.IsNullOrEmpty(search.Role) ? DBNull.Value : search.Role)).ToList<UserList>();
+                    new SqlParameter("@Role", string.IsNullOrEmpty(search.Role) ? DBNull.Value : search.Role)).ToList<Users>();
+            }
+            catch (Exception)
+            {
+                results = null;
+            }
+
+            return results;
+        }
+
+        public IEnumerable<DeletedUsers> ListDeleted(DeletedUsersSearchPost search)
+        {
+            IEnumerable<DeletedUsers> results;
+
+            try
+            {
+                results = _dbContextForSp.DeletedUsers.FromSqlRaw<DeletedUsers>("EXEC [dbo].[spListDeletedUsers]@Name", new SqlParameter("@Name", string.IsNullOrEmpty(search.Name) ? DBNull.Value : search.Name)).ToList<DeletedUsers>();
             }
             catch (Exception)
             {
@@ -163,7 +180,8 @@ namespace AdminService.Repos.Identity
     public interface IUsersRepo
     {
         User Fetch(string id);
-        IEnumerable<UserList> List(ListUsersPost search);
+        IEnumerable<Users> List(UsersSearchPost search);
+        IEnumerable<DeletedUsers> ListDeleted(DeletedUsersSearchPost name);
         void Create(User item);     
         void Update(User item, string fields);
         public int SaveChanges();
