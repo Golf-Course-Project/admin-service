@@ -12,7 +12,8 @@ namespace AdminService.ViewModels.Identity
             Name = null;
             Email = null;
             Role = null;
-            Status = -1;        
+            Status = -1;
+            IsDeleted = false;
         }
 
         [JsonProperty(PropertyName = "name")]
@@ -25,6 +26,9 @@ namespace AdminService.ViewModels.Identity
         public string Role { get; set; }
 
         [JsonProperty(PropertyName = "status")]
-        public int? Status { get; set; }           
+        public int? Status { get; set; }
+
+        [JsonProperty(PropertyName = "isDeleted")]
+        public bool IsDeleted { get; set; }
     }
 }

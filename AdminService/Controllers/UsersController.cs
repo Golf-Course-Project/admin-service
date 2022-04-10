@@ -43,7 +43,8 @@ namespace AdminService.Controllers
                 Name = String.IsNullOrEmpty(body.Name) ? null : body.Name.Trim(),
                 Email = String.IsNullOrEmpty(body.Email) ? null : body.Email.Trim(),
                 Role = String.IsNullOrEmpty(body.Role) ? null : body.Role.Trim(),
-                Status = body.Status == null ? -1 : body.Status               
+                Status = body.Status == null ? -1 : body.Status,
+                IsDeleted = body.IsDeleted ? true : false
             };
 
             body = null;
@@ -73,48 +74,6 @@ namespace AdminService.Controllers
                 response.MessageCode = Enums.ApiMessageCodes.ExceptionThrown;
                 response.Message = "Error getting list:" + ex.Message;
             }           
-
-            return new StandardResponseObjectResult(response, StatusCodes.Status200OK);
-        }
-
-        [HttpPost]
-        [Route("deleted")]
-        public IActionResult Deleted([FromBody] DeletedUsersSearchPost body)
-        {  
-            ApiResponse response = new ApiResponse();
-
-            if (body == null) body = new DeletedUsersSearchPost();
-
-            DeletedUsersSearchPost newBody = new DeletedUsersSearchPost()
-            {
-                Name = String.IsNullOrEmpty(body.Name) ? null : body.Name.Trim()               
-            };
-
-            body = null;
-
-            try
-            {
-                IEnumerable<DeletedUsers> list = _usersRepo.ListDeleted(newBody);
-
-                if (list != null)
-                {
-                    response.Success = true;
-                    response.MessageCode = ApiMessageCodes.Success;
-                    response.Message = "Success";
-                    response.Count = list.Count();
-                    response.Value = list;
-                }
-                else
-                {
-                    response.MessageCode = Enums.ApiMessageCodes.NoResults;
-                    response.Message = "No results found";
-                }
-            }
-            catch (Exception ex)
-            {
-                response.MessageCode = Enums.ApiMessageCodes.ExceptionThrown;
-                response.Message = "Error getting list:" + ex.Message;
-            }
 
             return new StandardResponseObjectResult(response, StatusCodes.Status200OK);
         }
