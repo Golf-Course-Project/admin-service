@@ -44,6 +44,9 @@ namespace AdminService.ViewModels.Identity
         [JsonProperty(PropertyName = "dateLocked")]
         public DateTime? DateLocked { get; set; }
 
+        [JsonProperty(PropertyName = "dateDeleted")]
+        public DateTime? DateDeleted { get; set; }
+
         [JsonProperty(PropertyName = "rowNumber")]
         public Int64 RowNumber { get; set; }
 
