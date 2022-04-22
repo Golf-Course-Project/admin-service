@@ -211,6 +211,67 @@ namespace AdminService.Controllers
 
                 return new StandardResponseObjectResult(response, StatusCodes.Status500InternalServerError);
             }
-        }       
+        }
+
+        [HttpDelete]
+        [Route("deleteforever/{id}")]
+        public IActionResult DeleteForever(string id)
+        {
+            ApiResponse response = new ApiResponse();    
+
+            if (String.IsNullOrEmpty(id))
+            {
+                response.MessageCode = ApiMessageCodes.NullValue;
+                response.Message = "Missing id value";
+
+                return new StandardResponseObjectResult(response, StatusCodes.Status200OK);
+            } 
+
+            User user = _usersRepo.Fetch(id.ToLower());
+
+            if (user == null)
+            {
+                response.Message = "User not found";
+                response.MessageCode = ApiMessageCodes.NotFound;
+
+                return new StandardResponseObjectResult(response, StatusCodes.Status200OK);
+            }
+
+            // only a status of exceeded login attempts can be reset
+            if (! user.IsDeleted)
+            {
+                response.Message = "User cannot be permentatly deleted at this time";
+                response.MessageCode = ApiMessageCodes.Failed;
+
+                return new StandardResponseObjectResult(response, StatusCodes.Status200OK);
+            }          
+
+            try
+            {
+                _usersRepo.Destroy(id);
+                int result = _usersRepo.SaveChanges();
+
+                if (result == 0)
+                {
+                    response.Message = $"Error destroying user";
+                    response.MessageCode = ApiMessageCodes.Failed;
+
+                    return new StandardResponseObjectResult(response, StatusCodes.Status500InternalServerError);
+                }
+
+                response.Success = true;
+                response.MessageCode = ApiMessageCodes.Success;
+                response.Message = "Success";
+
+                return new StandardResponseObjectResult(response, StatusCodes.Status202Accepted);
+            }
+            catch (Exception ex)
+            {
+                response.Message = "Exception thrown: " + ex.Message;
+                response.MessageCode = ApiMessageCodes.ExceptionThrown;
+
+                return new StandardResponseObjectResult(response, StatusCodes.Status500InternalServerError);
+            }
+        }
     }
 }
