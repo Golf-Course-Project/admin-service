@@ -520,6 +520,144 @@ namespace AdminService.Tests.Controllers
             _mockUsersRepo.Verify(x => x.Fetch(It.IsAny<String>()), Times.Once);
             _mockUsersRepo.Verify(x => x.Update(It.IsAny<User>(), It.IsAny<String>()), Times.Once);
             _mockUsersRepo.Verify(x => x.SaveChanges(), Times.Once);
-        }        
+        }
+
+        [TestMethod]
+        [TestCategory("Controllers")]
+        [Priority(0)]
+        public void DeleteForever_Success()
+        {
+            // arrange           
+            User user = new User() { Id = _userId, IsDeleted = true };
+
+            _mockUsersRepo.Setup(x => x.Fetch(It.IsAny<String>())).Returns(user);
+            _mockUsersRepo.Setup(x => x.SaveChanges()).Returns(1);
+
+            // act
+            IActionResult result = _controller.DeleteForever(_userId);
+            var standardResponse = (StandardResponseObjectResult)result;
+            var apiResponse = (ApiResponse)standardResponse.Value;
+
+            // assert
+            Assert.IsInstanceOfType(result, typeof(IActionResult), "'result' type must be of IActionResult");
+            Assert.AreEqual(StatusCodes.Status202Accepted, standardResponse.StatusCode);
+            Assert.IsTrue(apiResponse.Success);
+            Assert.AreEqual(ApiMessageCodes.Success, apiResponse.MessageCode);
+            Assert.IsTrue(apiResponse.Message.Contains("Success"));
+
+            _mockUsersRepo.Verify(x => x.Fetch(It.IsAny<String>()), Times.Once);
+            _mockUsersRepo.Verify(x => x.Destroy(It.IsAny<String>()), Times.Once);
+            _mockUsersRepo.Verify(x => x.SaveChanges(), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("Controllers")]
+        [Priority(0)]
+        public void DeleteForever_EmptyOrNullId()
+        {
+            // arrange
+            string id = "";
+
+            // act
+            IActionResult result = _controller.DeleteForever(id);
+            var standardResponse = (StandardResponseObjectResult)result;
+            var apiResponse = (ApiResponse)standardResponse.Value;
+
+            // assert
+            Assert.IsInstanceOfType(result, typeof(IActionResult), "'result' type must be of IActionResult");
+            Assert.AreEqual(StatusCodes.Status200OK, standardResponse.StatusCode);
+            Assert.IsFalse(apiResponse.Success);
+            Assert.AreEqual(ApiMessageCodes.NullValue, apiResponse.MessageCode);
+            Assert.IsTrue(apiResponse.Message.Contains("Missing id value"));
+
+            _mockUsersRepo.Verify(x => x.Fetch(It.IsAny<String>()), Times.Never);
+            _mockUsersRepo.Verify(x => x.Destroy(It.IsAny<String>()), Times.Never);
+            _mockUsersRepo.Verify(x => x.SaveChanges(), Times.Never);
+        }
+
+        [TestMethod]
+        [TestCategory("Controllers")]
+        [Priority(0)]
+        public void DeleteForever_UserNotFound()
+        {
+            // arrange           
+            User user = null;
+
+            _mockUsersRepo.Setup(x => x.Fetch(It.IsAny<String>())).Returns(user);
+            _mockUsersRepo.Setup(x => x.SaveChanges()).Returns(1);
+
+            // act
+            IActionResult result = _controller.DeleteForever(_userId);
+            var standardResponse = (StandardResponseObjectResult)result;
+            var apiResponse = (ApiResponse)standardResponse.Value;
+
+            // assert
+            Assert.IsInstanceOfType(result, typeof(IActionResult), "'result' type must be of IActionResult");
+            Assert.AreEqual(StatusCodes.Status200OK, standardResponse.StatusCode);
+            Assert.IsFalse(apiResponse.Success);
+            Assert.AreEqual(ApiMessageCodes.NotFound, apiResponse.MessageCode);
+            Assert.IsTrue(apiResponse.Message.Contains("User not found"));
+
+            _mockUsersRepo.Verify(x => x.Fetch(It.IsAny<String>()), Times.Once);
+            _mockUsersRepo.Verify(x => x.Destroy(It.IsAny<String>()), Times.Never);
+            _mockUsersRepo.Verify(x => x.SaveChanges(), Times.Never);
+        }
+
+        [TestMethod]
+        [TestCategory("Controllers")]
+        [Priority(0)]
+        public void DeleteForever_UserIsNotDeleted()
+        {
+            // arrange           
+            User user = new User() { Id = _userId, IsDeleted = false };
+
+            _mockUsersRepo.Setup(x => x.Fetch(It.IsAny<String>())).Returns(user);
+            _mockUsersRepo.Setup(x => x.SaveChanges()).Returns(1);
+
+            // act
+            IActionResult result = _controller.DeleteForever(_userId);
+            var standardResponse = (StandardResponseObjectResult)result;
+            var apiResponse = (ApiResponse)standardResponse.Value;
+
+            // assert
+            Assert.IsInstanceOfType(result, typeof(IActionResult), "'result' type must be of IActionResult");
+            Assert.AreEqual(StatusCodes.Status200OK, standardResponse.StatusCode);
+            Assert.IsFalse(apiResponse.Success);
+            Assert.AreEqual(ApiMessageCodes.Failed, apiResponse.MessageCode);
+            Assert.IsTrue(apiResponse.Message.Contains("User cannot be permentatly deleted at this time"));
+
+            _mockUsersRepo.Verify(x => x.Fetch(It.IsAny<String>()), Times.Once);
+            _mockUsersRepo.Verify(x => x.Destroy(It.IsAny<String>()), Times.Never);
+            _mockUsersRepo.Verify(x => x.SaveChanges(), Times.Never);
+        }
+
+
+        [TestMethod]
+        [TestCategory("Controllers")]
+        [Priority(0)]
+        public void DeleteForever_ZeroSaveResult()
+        {
+            // arrange           
+            User user = new User() { Id = _userId, IsDeleted = true };
+
+            _mockUsersRepo.Setup(x => x.Fetch(It.IsAny<String>())).Returns(user);
+            _mockUsersRepo.Setup(x => x.SaveChanges()).Returns(0);
+
+            // act
+            IActionResult result = _controller.DeleteForever(_userId);
+            var standardResponse = (StandardResponseObjectResult)result;
+            var apiResponse = (ApiResponse)standardResponse.Value;
+
+            // assert
+            Assert.IsInstanceOfType(result, typeof(IActionResult), "'result' type must be of IActionResult");
+            Assert.AreEqual(StatusCodes.Status500InternalServerError, standardResponse.StatusCode);
+            Assert.IsFalse(apiResponse.Success);
+            Assert.AreEqual(ApiMessageCodes.Failed, apiResponse.MessageCode);
+            Assert.IsTrue(apiResponse.Message.Contains("Error destroying user"));
+
+            _mockUsersRepo.Verify(x => x.Fetch(It.IsAny<String>()), Times.Once);
+            _mockUsersRepo.Verify(x => x.Destroy(It.IsAny<String>()), Times.Once);
+            _mockUsersRepo.Verify(x => x.SaveChanges(), Times.Once);
+        }
     }
 }
