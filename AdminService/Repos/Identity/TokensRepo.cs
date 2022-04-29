@@ -49,7 +49,7 @@ namespace AdminService.Repos.Identity
             return item;            
         }
 
-        public IEnumerable<Tokens> List(string organizationId = "")
+        public IEnumerable<Tokens> List()
         {
             IEnumerable<Tokens> results;
 
@@ -116,7 +116,7 @@ namespace AdminService.Repos.Identity
     public interface ITokensRepo
     {      
         Token Fetch(string token);
-        IEnumerable<Tokens> List(string organizationId = "");
+        IEnumerable<Tokens> List();
         void Destroy(string id);
         int SaveChanges();
     }

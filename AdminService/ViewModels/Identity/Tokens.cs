@@ -6,10 +6,7 @@ namespace AdminService.ViewModels.Identity
     public class Tokens
     {
         [JsonProperty(PropertyName = "id")]
-        public string Id { get; set; }
-
-        [JsonProperty(PropertyName = "userId")]
-        public string UserId { get; set; }
+        public string Id { get; set; }      
 
         [JsonProperty(PropertyName = "type")]
         public int Type { get; set; }
@@ -31,5 +28,8 @@ namespace AdminService.ViewModels.Identity
 
         [JsonProperty(PropertyName = "email")]
         public string Email { get; set; }
+
+        [JsonProperty(PropertyName = "rowNumber")]
+        public Int64 RowNumber { get; set; }
     }
 }
