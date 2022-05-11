@@ -55,7 +55,7 @@ namespace AdminService.Repos.Identity
 
             try
             {
-                results = this._dbContextForSp.Tokens.FromSqlRaw<Tokens>("EXEC [dbo].[spListUserTokens]").ToList<Tokens>();
+                results = this._dbContextForSp.Tokens.FromSqlRaw<Tokens>("EXEC [dbo].[spListTokens]").ToList<Tokens>();
             }
             catch (Exception)
             {
