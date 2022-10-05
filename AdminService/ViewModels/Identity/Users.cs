@@ -26,6 +26,9 @@ namespace AdminService.ViewModels.Identity
         [JsonProperty(PropertyName = "statusText")]
         public string StatusText { get; set; }
 
+        [JsonProperty(PropertyName = "avatar_url")]
+        public string Avatar_Url { get; set; }
+
         [JsonProperty(PropertyName = "isLocked")]
         public Boolean IsLocked { get; set; }
 
