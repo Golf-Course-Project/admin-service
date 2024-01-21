@@ -40,14 +40,14 @@ namespace IdentityService
             services.AddHttpContextAccessor();
 
             //api versioning service
-            services.AddApiVersioning();
+            //services.AddApiVersioning();
 
-            services.AddApiVersioning(config =>
-            {
-                config.DefaultApiVersion = new ApiVersion(1, 0);
-                config.AssumeDefaultVersionWhenUnspecified = true;
-                config.ReportApiVersions = true;
-            });            
+            //services.AddApiVersioning(config =>
+            //{
+            //    config.DefaultApiVersion = new ApiVersion(1, 0);
+            //    config.AssumeDefaultVersionWhenUnspecified = true;
+            //    config.ReportApiVersions = true;
+            //});            
 
             // configure DI for application services
             services.Configure<AppSettings>(_configuration.GetSection("AppSettings"));
